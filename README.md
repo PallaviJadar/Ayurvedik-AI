@@ -1,0 +1,1 @@
+# Ayurvedik-AI
