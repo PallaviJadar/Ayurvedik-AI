@@ -5,3 +5,4 @@ transformers
 flask
 google-generativeai
 werkzeug
+gunicorn
