@@ -6,3 +6,5 @@ flask
 google-generativeai
 werkzeug
 gunicorn
+python-dotenv
+markdown
