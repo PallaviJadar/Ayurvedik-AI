@@ -1,0 +1,7 @@
+gradio
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.6.0+cpu
+Pillow
+transformers[torch]
+google-generativeai
+python-dotenv

@@ -1,0 +1,121 @@
+import gradio as gr
+import os
+from PIL import Image
+from transformers import pipeline
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+
+# Configure Gemini AI
+genai.configure(api_key=api_key)
+generation_config = {
+    "temperature": 0.9,
+    "top_p": 0.95,
+    "top_k": 64,
+    "max_output_tokens": 8192,
+}
+
+model_genai = genai.GenerativeModel(
+    model_name="gemini-2.0-flash",
+    generation_config=generation_config
+)
+
+# Lazy-load ML model
+pipe = None
+
+def get_model():
+    global pipe
+    if pipe is None:
+        from transformers import pipeline
+        pipe = pipeline("image-classification", "dima806/medicinal_plants_image_detection")
+    return pipe
+
+def predict_plant(image):
+    """Identify medicinal plant from image"""
+    if image is None:
+        return "Please upload an image first!"
+    
+    try:
+        model = get_model()
+        outputs = model(image)
+        plant_name = outputs[0]['label']
+        confidence = outputs[0]['score']
+        
+        result = f"🌿 **Plant Identified**: {plant_name}\n\n"
+        result += f"📊 **Confidence**: {confidence:.2%}\n\n"
+        result += f"Click 'Get Plant Info' to learn more about {plant_name}!"
+        
+        return result
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+def get_plant_info(plant_name):
+    """Get detailed information about a medicinal plant"""
+    if not plant_name:
+        return "Please identify a plant first!"
+    
+    try:
+        chat = model_genai.start_chat(history=[])
+        prompt = f"Tell me everything about the medicinal plant '{plant_name}'. Include scientific name, medicinal properties, traditional uses, preparation methods, health benefits, and precautions. Format with emojis and clear sections."
+        
+        response = chat.send_message(prompt)
+        return response.text
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+def chat_with_ai(message, history):
+    """Chat with Gemini AI about Ayurveda and medicinal plants"""
+    try:
+        chat = model_genai.start_chat(history=[])
+        chat.send_message("You are AyurVedik AI, an expert in medicinal plants and Ayurveda. Answer questions helpfully with emojis.")
+        
+        response = chat.send_message(message)
+        return response.text
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
+
+# Create Gradio Interface
+with gr.Blocks(title="AyurVedik AI", theme=gr.themes.Soft()) as demo:
+    gr.Markdown("# 🌿 AyurVedik AI - Medicinal Plant Identifier")
+    gr.Markdown("### Identify medicinal plants and learn about Ayurveda")
+    
+    with gr.Tab("🔍 Identify Plant"):
+        with gr.Row():
+            with gr.Column():
+                image_input = gr.Image(type="pil", label="Upload Plant Image")
+                identify_btn = gr.Button("🔍 Identify Plant", variant="primary")
+            with gr.Column():
+                prediction_output = gr.Markdown(label="Identification Result")
+        
+        plant_name_state = gr.State()
+        
+        with gr.Row():
+            plant_name_input = gr.Textbox(label="Plant Name (from identification above)", placeholder="Enter plant name or use identification result")
+            get_info_btn = gr.Button("📚 Get Plant Info", variant="secondary")
+        
+        info_output = gr.Markdown(label="Plant Information")
+        
+        identify_btn.click(
+            fn=predict_plant,
+            inputs=image_input,
+            outputs=prediction_output
+        )
+        
+        get_info_btn.click(
+            fn=get_plant_info,
+            inputs=plant_name_input,
+            outputs=info_output
+        )
+    
+    with gr.Tab("💬 Chat with AI"):
+        gr.Markdown("### Ask me anything about medicinal plants and Ayurveda!")
+        chatbot = gr.Chatbot(height=400)
+        msg = gr.Textbox(label="Your Question", placeholder="Ask about medicinal plants, Ayurveda, health benefits...")
+        
+        msg.submit(chat_with_ai, [msg, chatbot], chatbot)
+
+if __name__ == "__main__":
+    demo.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 7860)))
