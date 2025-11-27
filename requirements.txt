@@ -1,10 +1,9 @@
-torch
-torchvision
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.0.1+cpu
+torchvision==0.15.2+cpu
 Pillow
 transformers
 flask
 google-generativeai
-werkzeug
-gunicorn
 python-dotenv
 markdown
