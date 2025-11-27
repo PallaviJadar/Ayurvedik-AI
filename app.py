@@ -25,8 +25,16 @@ def markdown_filter(text):
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Load the image classification model
-pipe = pipeline("image-classification", "dima806/medicinal_plants_image_detection")
+# Don't load the model at startup to save memory
+# It will be loaded lazily when first image is uploaded
+pipe = None
+
+def get_model():
+    global pipe
+    if pipe is None:
+        from transformers import pipeline
+        pipe = pipeline("image-classification", "dima806/medicinal_plants_image_detection")
+    return pipe
 
 
 ###################################################
@@ -188,8 +196,9 @@ def predict():
                 # Process the image
                 image = Image.open(file.stream)
                 
-                # Perform image classification
-                outputs = pipe(image)
+                # Perform image classification (lazy-load model)
+                model = get_model()
+                outputs = model(image)
                 plant_name = outputs[0]['label']
                 confidence = outputs[0]['score']
                 
