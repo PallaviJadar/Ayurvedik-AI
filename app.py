@@ -88,14 +88,16 @@ def chat_with_ai(message, history):
         
         response = chat.send_message(message)
         
-        # Append as list of [user_message, bot_response] for Gradio 4.x
-        history.append([message, response.text])
+        # Append new message and response to history in 'messages' format
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": response.text})
         
         return history, "" # Return updated history and empty string to clear input
     except Exception as e:
         if history is None:
             history = []
-        history.append([message, f"❌ Error: {str(e)}"])
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": f"❌ Error: {str(e)}"})
         return history, ""
 
 # Create Gradio Interface
@@ -133,7 +135,7 @@ with gr.Blocks(title="AyurVedik AI", theme=gr.themes.Soft()) as demo:
     
     with gr.Tab("💬 Chat with AI"):
         gr.Markdown("### Ask me anything about medicinal plants and Ayurveda!")
-        chatbot = gr.Chatbot(height=400)
+        chatbot = gr.Chatbot(height=400, type="messages")
         msg = gr.Textbox(label="Your Question", placeholder="Ask about medicinal plants, Ayurveda, health benefits...")
         
         msg.submit(chat_with_ai, [msg, chatbot], [chatbot, msg])
