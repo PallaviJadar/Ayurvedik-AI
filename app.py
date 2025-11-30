@@ -85,7 +85,7 @@ def chat_with_ai(message, history):
         return history, ""
 
 # Create Gradio Interface
-with gr.Blocks(title="AyurVedik AI", theme=gr.themes.Soft()) as demo:
+with gr.Blocks(title="AyurVedik AI", theme=gr.themes.Soft(), show_api=False) as demo:
     gr.Markdown("# 🌿 AyurVedik AI - Medicinal Plant Identifier")
     gr.Markdown("### Identify medicinal plants and learn about Ayurveda")
     
