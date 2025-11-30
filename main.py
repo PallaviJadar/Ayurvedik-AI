@@ -38,8 +38,9 @@ pipe = None
 def get_model():
     global pipe
     if pipe is None:
-        from transformers import pipeline
-        pipe = pipeline("image-classification", "dima806/medicinal_plants_image_detection")
+        from optimum.pipelines import pipeline
+        # Use ONNX Runtime for lower memory usage
+        pipe = pipeline("image-classification", "dima806/medicinal_plants_image_detection", accelerator="ort")
     return pipe
 
 def predict_plant(image):
