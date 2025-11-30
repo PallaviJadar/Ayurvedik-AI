@@ -1,7 +1,7 @@
 import gradio as gr
 import os
 from PIL import Image
-from transformers import pipeline
+
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -32,33 +32,19 @@ model_genai = genai.GenerativeModel(
     generation_config=generation_config
 )
 
-# Lazy-load ML model
-pipe = None
-
-def get_model():
-    global pipe
-    if pipe is None:
-        from optimum.pipelines import pipeline
-        # Use ONNX Runtime for lower memory usage
-        pipe = pipeline("image-classification", "dima806/medicinal_plants_image_detection", accelerator="ort")
-    return pipe
+# Lazy-load ML model removed - using Gemini Vision
 
 def predict_plant(image):
-    """Identify medicinal plant from image"""
+    """Identify medicinal plant from image using Gemini Vision"""
     if image is None:
         return "Please upload an image first!"
     
     try:
-        model = get_model()
-        outputs = model(image)
-        plant_name = outputs[0]['label']
-        confidence = outputs[0]['score']
+        # Use Gemini 1.5 Flash for vision capabilities
+        prompt = "Identify this medicinal plant. Provide the name and a confidence score. If it's not a medicinal plant, say so."
+        response = model_genai.generate_content([prompt, image])
         
-        result = f"🌿 **Plant Identified**: {plant_name}\n\n"
-        result += f"📊 **Confidence**: {confidence:.2%}\n\n"
-        result += f"Click 'Get Plant Info' to learn more about {plant_name}!"
-        
-        return result
+        return response.text
     except Exception as e:
         return f"❌ Error: {str(e)}"
 
