@@ -125,4 +125,4 @@ with gr.Blocks(title="AyurVedik AI", theme=gr.themes.Soft()) as demo:
         msg.submit(chat_with_ai, [msg, chatbot], [chatbot, msg])
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860, share=True)
