@@ -4,7 +4,7 @@ services:
     runtime: python
     pythonVersion: 3.11
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: python main.py
     envVars:
       - key: GEMINI_API_KEY
         sync: false
