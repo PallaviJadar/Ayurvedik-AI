@@ -1,7 +1,27 @@
+# Monkeypatch to fix Gradio TypeError bug
+import sys
+from unittest.mock import MagicMock
+
+# Patch the buggy function before Gradio loads
+def patch_gradio():
+    try:
+        from gradio_client import utils
+        original_get_type = utils._json_schema_to_python_type
+        
+        def safe_get_type(schema, defs=None):
+            if isinstance(schema, bool):
+                return "bool"
+            return original_get_type(schema, defs)
+        
+        utils._json_schema_to_python_type = safe_get_type
+    except:
+        pass
+
+patch_gradio()
+
 import gradio as gr
 import os
 from PIL import Image
-
 import google.generativeai as genai
 from dotenv import load_dotenv
 
