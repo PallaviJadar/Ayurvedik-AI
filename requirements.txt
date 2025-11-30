@@ -4,4 +4,4 @@ optimum[onnxruntime]
 # torch removed to save memory
 Pillow
 google-generativeai
-python-dotenv
+pydantic<2.0
