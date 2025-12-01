@@ -40,16 +40,8 @@ try:
 except Exception as e:
     print(f"Error configuring Gemini API: {e}")
 
-generation_config = {
-    "temperature": 0.9,
-    "top_p": 0.95,
-    "top_k": 64,
-    "max_output_tokens": 8192,
-}
-
 model_genai = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    generation_config=generation_config
+    model_name="gemini-1.5-flash-001"
 )
 
 # Lazy-load ML model removed - using Gemini Vision
